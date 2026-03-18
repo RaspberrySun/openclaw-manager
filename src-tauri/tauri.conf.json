@@ -60,7 +60,12 @@
         "bundleMediaFramework": true
       },
       "deb": {
-        "depends": []
+        "depends": [],
+        "files": {
+          "/usr/lib/open-claw-manager/openclaw-manager.bin": "src-tauri/target/aarch64-unknown-linux-gnu/release/openclaw-manager",
+          "/usr/bin/openclaw-manager": "src-tauri/icons/openclaw-manager-wrapper.sh",
+          "/usr/share/applications/openclaw-manager.desktop": "src-tauri/icons/openclaw-manager.desktop"
+        }
       }
     }
   }
