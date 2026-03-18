@@ -31,11 +31,16 @@ jobs:
             target: x86_64-pc-windows-msvc
             rust_targets: x86_64-pc-windows-msvc
             label: Windows
-          # Linux
+          # Linux x86_64
           - platform: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
             rust_targets: x86_64-unknown-linux-gnu
             label: Linux
+          # Linux ARM64
+          - platform: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+            rust_targets: aarch64-unknown-linux-gnu
+            label: Linux ARM64
 
     runs-on: ${{ matrix.platform }}
     name: Build (${{ matrix.label }})

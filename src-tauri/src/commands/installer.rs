@@ -437,31 +437,30 @@ node --version
 
 /// Linux 安装 Node.js
 async fn install_nodejs_linux() -> Result<InstallResult, String> {
-    // 使用 NodeSource 仓库安装
+    // 使用 nvm 安装，不依赖 sudo
     let script = r#"
-# 检测包管理器
-if command -v apt-get &> /dev/null; then
-    echo "检测到 apt，使用 NodeSource 仓库..."
-    curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-    sudo apt-get install -y nodejs
-elif command -v dnf &> /dev/null; then
-    echo "检测到 dnf，使用 NodeSource 仓库..."
-    curl -fsSL https://rpm.nodesource.com/setup_22.x | sudo bash -
-    sudo dnf install -y nodejs
-elif command -v yum &> /dev/null; then
-    echo "检测到 yum，使用 NodeSource 仓库..."
-    curl -fsSL https://rpm.nodesource.com/setup_22.x | sudo bash -
-    sudo yum install -y nodejs
-elif command -v pacman &> /dev/null; then
-    echo "检测到 pacman..."
-    sudo pacman -S nodejs npm --noconfirm
-else
-    echo "无法检测到支持的包管理器"
-    exit 1
+set -e
+
+# 安装 nvm（如果未安装）
+export NVM_DIR="$HOME/.nvm"
+if [ ! -d "$NVM_DIR" ]; then
+    echo "正在安装 nvm..."
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 fi
 
+# 加载 nvm
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+# 安装 Node.js 22
+echo "正在安装 Node.js 22..."
+nvm install 22
+nvm use 22
+nvm alias default 22
+
 # 验证安装
+echo "Node.js 安装完成！"
 node --version
+npm --version
 "#;
     
     match shell::run_bash_output(script) {
@@ -748,6 +747,56 @@ read -p "按回车键关闭此窗口..."
             .spawn()
             .map_err(|e| format!("启动终端失败: {}", e))?;
         
+        Ok("已打开安装终端".to_string())
+    } else if platform::is_linux() {
+        // Linux: 使用 nvm 安装（不需要 sudo）
+        let script_content = r#"#!/bin/bash
+clear
+echo "========================================"
+echo "    Node.js 安装向导"
+echo "========================================"
+echo ""
+
+export NVM_DIR="$HOME/.nvm"
+
+# 安装 nvm
+if [ ! -d "$NVM_DIR" ]; then
+    echo "正在安装 nvm..."
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+fi
+
+# 加载 nvm
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+echo "正在安装 Node.js 22..."
+nvm install 22
+nvm use 22
+nvm alias default 22
+
+echo ""
+echo "安装完成！"
+node --version
+npm --version
+echo ""
+echo "按回车键关闭此窗口..."
+read
+"#;
+
+        let script_path = "/tmp/openclaw_install_nodejs.sh";
+        std::fs::write(script_path, script_content)
+            .map_err(|e| format!("创建脚本失败: {}", e))?;
+
+        std::process::Command::new("chmod")
+            .args(["+x", script_path])
+            .output()
+            .map_err(|e| format!("设置权限失败: {}", e))?;
+
+        // 打开默认终端执行脚本
+        std::process::Command::new("bash")
+            .arg(script_path)
+            .spawn()
+            .map_err(|e| format!("启动终端失败: {}", e))?;
+
         Ok("已打开安装终端".to_string())
     } else {
         Err("请手动安装 Node.js: https://nodejs.org/".to_string())
