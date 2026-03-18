@@ -1,0 +1,9 @@
+[Desktop Entry]
+Categories=Utility;
+Comment=OpenClaw AI 助手管理工具
+Exec=openclaw-manager-wrapper
+StartupWMClass=openclaw-manager
+Icon=openclaw-manager
+Name=OpenClaw Manager
+Terminal=false
+Type=Application

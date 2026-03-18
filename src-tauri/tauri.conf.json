@@ -60,7 +60,11 @@
         "bundleMediaFramework": true
       },
       "deb": {
-        "depends": []
+        "depends": [],
+        "files": {
+          "/usr/bin/openclaw-manager": "icons/openclaw-manager-wrapper.sh",
+          "/usr/share/applications/openclaw-manager.desktop": "icons/openclaw-manager.desktop"
+        }
       }
     }
   }
